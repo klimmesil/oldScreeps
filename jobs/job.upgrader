@@ -9,8 +9,8 @@ var jobUpgrader = {
 
       if (!creep.memory.upping){
         if (debug) creep.say("⚡");
-        var source = creep.pos.findClosestByRange(FIND_SOURCES, {filter : (source) => (source.energy >= 50)});
-        if (creep.harvest(source) == ERR_NOT_IN_RANGE){
+        var source = creep.pos.findClosestByRange(FIND_STRUCTURES, {filter : (structure) => (structure.structureType == STRUCTURE_CONTAINER)});
+        if (creep.withdraw(source, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE){
           creep.moveTo(source, {visualizePathStyle : {stroke : "#e0f015"}});
         }
       } else {

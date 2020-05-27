@@ -3,6 +3,7 @@ var jobHarvester = require('job.harvester');
 var jobUpgrader = require('job.upgrader');
 var jobBuilder = require('job.builder');
 var jobMiner = require('job.miner');
+var jobHauler = require('job.hauler');
 
 /** Management **/
 var manageCrew = require("manage.crew");
@@ -36,6 +37,10 @@ module.exports.loop = function(){
 
       case "miner":
         jobMiner.run(creep, true);
+        break;
+
+      case "hauler":
+        jobHauler.run(creep,true);
         break;
     }
   }
