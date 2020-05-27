@@ -4,7 +4,7 @@ var jobBuilder = {
       // decide wether we are building or harvesting
       if (creep.memory.upping && creep.store.getUsedCapacity() == 0){
         upping = false;
-      } else if (!creep.memory.upping && creep.store.getFreeCapacity() == 0 {
+      } else if (!creep.memory.upping && creep.store.getFreeCapacity() == 0) {
         upping = true;
       }
 
