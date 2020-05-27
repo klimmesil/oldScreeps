@@ -1,13 +1,13 @@
-delete Memory.miningSites['5ece6c910ad73f6e796fcbeb'].miner;
-delete Memory.miningSites['5ece6c910ad73f6e796fcbeb'].miner;
-delete Game.creeps["miner18577189"].post;
-
+// mananage mining
 Memory.miningSites["5ece6c910ad73f6e796fcbeb"] = {energy: RESOURCE_ENERGY, miner: null, mining: "5bbcaf789099fc012e63aa49"};
 
+delete Memory.miningSites['5ece6c910ad73f6e796fcbeb'].miner;
+delete Memory.miningSites['5ece6c910ad73f6e796fcbeb'].miner;
+
+// manage spawning
 Memory.crewList.builder= {body: [WORK, WORK,CARRY, CARRY, MOVE, MOVE], number :2};
 
-for (var i in Game.creeps){
-  if (Game.creeps[i].memory.job == "builder"){
-    Game.creeps.[i].memory.job = "mob";
-  }
-}
+// manage crew
+Game.creeps["builder18579319"].memory.job = "mob";
+
+delete Game.creeps["miner18577189"].post;
