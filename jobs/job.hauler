@@ -1,4 +1,4 @@
-var jobHarvester = {
+var jobHauler = {
     /** @param {Creep} creep **/
     run : function(creep, debug){
       // refill if necessary
@@ -37,4 +37,4 @@ var jobHarvester = {
     }
 };
 
-module.exports = jobHarvester;
+module.exports = jobHauler;
