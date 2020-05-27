@@ -3,16 +3,16 @@ var jobBuilder = {
     run : function(creep){
       // decide wether we are building or harvesting
       if (creep.memory.upping && creep.store.getUsedCapacity() == 0){
-        upping = false;
+        creep.memory.upping = false;
       } else if (!creep.memory.upping && creep.store.getFreeCapacity() == 0) {
-        upping = true;
+        creep.memory.upping = true;
       }
 
       // either up or down
-      if (upping){
+      if (creep.memory.upping){
         var building = creep.pos.findClosestByRange(FIND_MY_CONSTRUCTION_SITES);
         if (creep.build(building) == ERR_NOT_IN_RANGE){
-          creep.moveTo(building, {visualizePathStyle: {stroke: "#af8c0c"}});
+          creep.moveTo(building, {visualizePathStyle: {stroke: "#04eb0b"}});
         }
       } else {
           var container = creep.pos.findClosestByRange(FIND_MY_STRUCTURES, {filter: (structure) => (structure.structureType == STRUCTURE_CONTAINER)});
