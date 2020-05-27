@@ -3,6 +3,7 @@ var jobHarvester = {
     run : function(creep, debug){
       // refill if necessary
       if(creep.store.getUsedCapacity() == 0){
+        if (debug) creep.say("⚡");
         var containers = creep.room.find(FIND_STRUCTURES, {filter: (structure)=>(structure.structureType == STRUCTURE_CONTAINER && structure.getUsedCapacity(RESOURCE_ENERGY) > 50)});
         var container = creep.pos.findClosestByRange(containers);
         if (creep.withdraw(container, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE){
@@ -19,7 +20,7 @@ var jobHarvester = {
         if (!target) target = creep.pos.findClosestByRange(targets, {filter: (structure) => (structure.structureType == STRUCTURE_EXTENSION)});
         if (!target){
           moveTo (Memory.sleepingSpot.x, Memory.sleepingSpot.y, {visualizePathStyle: {stroke: "#f12dec"}});
-          say("😴");
+          if (debug) creep.say("😴");
         }
       }
     }
