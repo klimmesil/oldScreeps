@@ -12,7 +12,6 @@ module.exports.loop = function(){
   manageCrew.deaths();
   manageCrew.respawn(Game.spawns["Spawn1"]);
 
-
   /** Screeps **/
   for (var name in Game.creeps){
 
