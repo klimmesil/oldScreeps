@@ -5,3 +5,9 @@ delete Game.creeps["miner18577189"].post;
 Memory.miningSites["5ece6c910ad73f6e796fcbeb"] = {energy: RESOURCE_ENERGY, miner: null, mining: "5bbcaf789099fc012e63aa49"};
 
 Memory.crewList.builder= {body: [WORK, WORK,CARRY, CARRY, MOVE, MOVE], number :2};
+
+for (var i in Game.creeps){
+  if (Game.creeps[i].memory.job == "builder"){
+    Game.creeps.[i].memory.job = "mob";
+  }
+}
