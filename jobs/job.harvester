@@ -14,7 +14,7 @@ var jobHarvester = {
 
         if (debug){
           if (!target) creep.say("😴");
-          else creep.say("⚡➡️"+target.structureType);
+          else if (debug) creep.say("⚡➡️"+target.structureType);
         }
         if (creep.transfer(target, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE){
           creep.moveTo(target, {visualizePathStyle : {stroke: "#1232f3"}});

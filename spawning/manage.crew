@@ -23,6 +23,7 @@ var manageCrew = {
       for (var jobName in jobNames){
         var alive = spawn.room.find(FIND_MY_CREEPS, {filter: (creep) => (creep.memory.job == jobName)});
         var number = jobNames[jobName].number;
+
         if (number > alive.length){
           var body = jobNames[jobName].body;
           var newName = jobName + Game.time;

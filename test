@@ -6,9 +6,10 @@ delete Memory.miningSites['5ece6c910ad73f6e796fcbeb'].miner;
 
 // manage spawning
 Memory.crewList.builder= {body: [WORK, WORK,CARRY, CARRY, MOVE, MOVE], number :2};
-Memory.crewList.upgrader= {body: [CARRY, CARRY, CARRY, CARRY, MOVE, MOVE], number :2};
+Memory.crewList.upgrader= {body: [CARRY, CARRY, CARRY, CARRY, WORK, MOVE, MOVE, MOVE], number :1};
 Memory.crewList.harvester= {body: [CARRY, CARRY, CARRY, CARRY, MOVE, MOVE], number :0};
-Memory.crewlist.hauler = {body: [CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,MOVE,MOVE,MOVE], number: 2}
+Memory.crewList.hauler = {body: [CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,MOVE,MOVE,MOVE], number: 2};
+Memory.crewList.miner = {body: [MOVE,CARRY,WORK,WORK,WORK,WORK], number: 2};
 
 // manage crew
 Game.creeps["builder18579319"].memory.job = "mob";

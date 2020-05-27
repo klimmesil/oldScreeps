@@ -23,30 +23,17 @@ var jobBuilder = {
         } else {
           // build
           target = creep.pos.findClosestByRange(FIND_MY_CONSTRUCTION_SITES);
-          if (debug) creep.say ("🏗️" + target.structureType);
+          if (debug && target) creep.say ("🏗️" + target.structureType);
           if (creep.build(target) == ERR_NOT_IN_RANGE){
             creep.moveTo(target, {visualizePathStyle: {stroke: "#04eb0b"}});
           }
         }
       } else {
         if (debug) creep.say("⚡");
-
-        // refill
-        var container = creep.pos.findClosestByRange(FIND_STRUCTURES, {filter: (structure) => (structure.structureType == STRUCTURE_CONTAINER && structure.store.getUsedCapacity(RESOURCE_ENERGY) > 0)});
-
-        if (container){
-          if (creep.withdraw(container, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE){
-            creep.moveTo(container, {visualizePathStyle: {stroke: "#e0f015"}});
-          }
-        } else {
-          var source = creep.pos.findClosestByRange(FIND_SOURCES, {filter: (source) => (source.energy >= 50)})
-          if (source){
-            if (creep.harvest(source) == ERR_NOT_IN_RANGE){
-              creep.moveTo(source, {visualizePathStyle: {stroke: "#e0f015"}});
-            }
-          } else{
-            console.log("no sources left");
-          }
+        var containers = creep.room.find(FIND_STRUCTURES, {filter: (structure)=>(structure.structureType == STRUCTURE_CONTAINER && structure.store.getUsedCapacity(RESOURCE_ENERGY) > 50)});
+        var container = creep.pos.findClosestByRange(containers);
+        if (creep.withdraw(container, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE){
+          creep.moveTo(container, {visualizePathStyle: {stroke: "#e0f015"}});
         }
       }
     }
