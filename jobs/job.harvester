@@ -1,0 +1,22 @@
+var jobHarvester = {
+    /** @param {Creep} creep **/
+    run : function(creep){
+      /** returning to spawn **/
+      if (creep.store.getFreeCapacity() == 0){
+        var localSpawn = Game.spawns["Spawn1"];
+        if (creep.transfer(localSpawn, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE){
+          creep.moveTo(localSpawn, {visualizePathStyle : {stroke: "#1232f3"}});
+        }
+      }
+
+      /** going to harvest **/
+      else {
+        var localSource = creep.pos.findClosestByRange(FIND_SOURCES, {filter: (source) => (source.energy >= 50)});
+        if (creep.harvest(localSource) == ERR_NOT_IN_RANGE){
+          creep.moveTo(localSource, {visualizePathStyle : {stroke: "#e0f015"}});
+        }
+      }
+    }
+};
+
+module.exports = jobHarvester;

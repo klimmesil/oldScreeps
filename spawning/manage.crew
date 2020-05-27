@@ -1,0 +1,40 @@
+var manageCrew = {
+  /** @param **/
+  deaths : function(){
+    for (var name in Memory.creeps){
+      if (!Game.creeps[name]){
+        delete Memory.creeps[name];
+        console.log("☠️ RIP " + name);
+      }
+    }
+  },
+
+  /** @param **/
+  respawn : function(spawn){
+    var jobNames = Memory.crewList;
+
+
+    if (spawn.spawning){
+      var newName = spawn.spawning.name;
+      spawn.room.visual.text(
+        "👶 " + Game.creeps[newName].memory.job,
+        spawn.pos.x,
+        spawn.pos.y);
+    } else {
+      for (var jobName in jobNames){
+        var alive = spawn.room.find(FIND_MY_CREEPS, {filter: (creep) => (creep.memory.job == jobName)});
+        var number = jobNames[jobName].number;
+        if (number < alive.length){
+          var body = jobNames[jobName].body;
+          var newName = jobName + Game.time;
+          spawn.spawnCreep(body, newName, {memory: {job: jobName}});
+          console.log("Spawning " + newName + " !");
+          break;
+        }
+      }
+    }
+
+  }
+};
+
+module.exports = manageCrew;
