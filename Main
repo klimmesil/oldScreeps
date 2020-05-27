@@ -26,6 +26,10 @@ module.exports.loop = function(){
       case "upgrader":
         jobUpgrader.run(creep);
         break;
+
+      case "builder":
+        jobBuilder.run(creep);
+        break;
     }
   }
 }
