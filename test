@@ -19,3 +19,7 @@ delete Game.creeps["miner18577189"].post;
 
 // sleeping spot
 Memory.sleepingSpot = {x: 17, y:17};
+
+
+// various
+var targets = Game.spawns["Spawn1"].pos.findClosestByRange(FIND_STRUCTURES, {filter: (structure) => (funcStruct.watched(structure))   });
