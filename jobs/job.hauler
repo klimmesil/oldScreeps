@@ -22,7 +22,7 @@ var jobHarvester = {
 
         // no target, going to sleep
         if (!target){
-          moveTo (Memory.sleepingSpot.x, Memory.sleepingSpot.y, {visualizePathStyle: {stroke: "#f12dec"}});
+          creep.moveTo (Memory.sleepingSpot.x, Memory.sleepingSpot.y, {visualizePathStyle: {stroke: "#f12dec"}});
           if (debug) creep.say("😴");
         }
 
