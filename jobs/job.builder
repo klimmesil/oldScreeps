@@ -11,8 +11,9 @@ var jobBuilder = {
       // either up or down
       if (creep.memory.upping){
         // see if someone needs repairs
-        var target = creep.pos.findClosestByRange(FIND_STRUCTURES, {filter: (structure) => (structure.hits < structure.hitsMax && structure.structureType != STRUCTURE_WALL)})
-
+        var target = creep.pos.findClosestByRange(FIND_STRUCTURES, {filter: (structure) => (structure.hits < structure.hitsMax &&
+                                                                                            structure.structureType != STRUCTURE_WALL &&
+                                                                                            !(structure.structureType == STRUCTURE_CONTAINER && Memory.miningSites[structure.id] && Memory.miningSites[structure.id].miner && Memory.miningSites[structure.id].resource == RESOURCE_ENERGY))});
         if (target) {
           // repair
           if (debug) creep.say("🛠️" + target.structureType);

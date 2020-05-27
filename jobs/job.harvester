@@ -24,7 +24,7 @@ var jobHarvester = {
       /** going to harvest **/
       else {
         if (debug) creep.say("⚡");
-        var localSource = creep.pos.findClosestByRange(FIND_SOURCES, {filter: (source) => (source.energy >= 50)});
+        var localSource = creep.pos.findClosestByPath(FIND_SOURCES, {filter: (source) => (source.energy >= 50)});
         if (creep.harvest(localSource) == ERR_NOT_IN_RANGE){
           creep.moveTo(localSource, {visualizePathStyle : {stroke: "#e0f015"}});
         }
