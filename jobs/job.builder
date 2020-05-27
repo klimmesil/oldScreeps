@@ -10,7 +10,7 @@ var jobBuilder = {
         creep.memory.upping = true;
       }
 
-      // either up or down
+      // building or repairing
       if (creep.memory.upping){
         // see if someone needs repairs
         var target = creep.pos.findClosestByRange(FIND_STRUCTURES, {filter: (structure) => (structure.hits < structure.hitsMax &&
@@ -25,11 +25,23 @@ var jobBuilder = {
         } else {
           // build
           target = creep.pos.findClosestByRange(FIND_MY_CONSTRUCTION_SITES);
-          if (debug && target) creep.say ("🏗️" + target.structureType);
-          if (creep.build(target) == ERR_NOT_IN_RANGE){
-            creep.moveTo(target, {visualizePathStyle: {stroke: "#04eb0b"}});
+          if(target){
+            if (debug && target) creep.say ("🏗️" + target.structureType);
+            if (creep.build(target) == ERR_NOT_IN_RANGE){
+              creep.moveTo(target, {visualizePathStyle: {stroke: "#04eb0b"}});
+            }
           }
+
+          // sleeping
+          else {
+            creep.moveTo (Memory.sleepingSpot.x, Memory.sleepingSpot.y, {visualizePathStyle: {stroke: "#f12dec"}});
+            if (debug) creep.say("😴");
+          }
+
         }
+
+
+      // refill
       } else {
         if (debug) creep.say("⚡");
         var containers = creep.room.find(FIND_STRUCTURES, {filter: (structure)=>(structure.structureType == STRUCTURE_CONTAINER && structure.store.getUsedCapacity(RESOURCE_ENERGY) > 50)});
