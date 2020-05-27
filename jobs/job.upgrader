@@ -1,6 +1,6 @@
 var jobUpgrader = {
     /** @param {Creep} creep **/
-    run : function(creep){
+    run : function(creep, debug){
       if (creep.memory.upping && creep.store.getUsedCapacity() == 0){
         creep.memory.upping = false;
       } else if (!creep.memory.upping && creep.store.getFreeCapacity() == 0){
@@ -8,11 +8,13 @@ var jobUpgrader = {
       }
 
       if (!creep.memory.upping){
+        if (debug) creep.say("⚡");
         var source = creep.pos.findClosestByRange(FIND_SOURCES, {filter : (source) => (source.energy >= 50)});
         if (creep.harvest(source) == ERR_NOT_IN_RANGE){
           creep.moveTo(source, {visualizePathStyle : {stroke : "#e0f015"}});
         }
       } else {
+        if (debug) creep.say("⏫");
         var controller = creep.room.controller;
         if (creep.upgradeController(controller) == ERR_NOT_IN_RANGE){
           creep.moveTo(controller, {visualizePathStyle : {stroke : "#1232f3"}});

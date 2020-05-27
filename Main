@@ -21,15 +21,15 @@ module.exports.loop = function(){
 
     switch (job){
       case "harvester":
-        jobHarvester.run(creep);
+        jobHarvester.run(creep, true);
         break;
 
       case "upgrader":
-        jobUpgrader.run(creep);
+        jobUpgrader.run(creep, true);
         break;
 
       case "builder":
-        jobBuilder.run(creep);
+        jobBuilder.run(creep, false);
         break;
     }
   }
