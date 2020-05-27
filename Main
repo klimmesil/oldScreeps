@@ -11,7 +11,7 @@ module.exports.loop = function(){
   /** Management **/
   manageCrew.deaths();
   manageCrew.respawn(Game.spawns["Spawn1"]);
-
+asdsadsad
 
   /** Screeps **/
   for (var name in Game.creeps){
