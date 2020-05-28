@@ -41,6 +41,12 @@ module.exports.loop = function(){
       case "hauler":
         jobHauler.run(creep, 2);
         break;
+
+      case "mob":
+        var target = Game.getObjectById("5ecced7e929e2d96f1d302ca");
+        if (creep.store.getUsedCapacity(RESOURCE_ENERGY)==0) creep.withdraw(target, RESOURCE_ENERGY);
+        else jobBuilder.run(creep, 1);
+        break;
     }
   }
 

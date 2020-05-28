@@ -20,12 +20,9 @@ var jobUpgrader = {
           creep.moveTo(source, {visualizePathStyle : {stroke : "#e0f015"}});
         }
 
-        // TEMPORARY
+        // go sleep
         if (!source){
-          source = creep.pos.findClosestByRange(FIND_SOURCES);
-          if (creep.harvest(source) == ERR_NOT_IN_RANGE){
-            creep.moveTo(source, {visualizePathStyle : {stroke : "#e0f015"}});
-          }
+          funcCreeps.sleep(creep,debug);
         }
       } else {
         if (debug == 1) creep.say("⏫");

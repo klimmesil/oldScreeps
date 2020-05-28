@@ -10,12 +10,14 @@ Memory.crewList.harvester= {body: [CARRY, CARRY, CARRY, CARRY, MOVE, MOVE], numb
 Memory.crewList.hauler = {body: [CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,MOVE,MOVE,MOVE], number: 1, order: 1};
 Memory.crewList.miner = {body: [MOVE,CARRY,WORK,WORK,WORK,WORK], number: 2, order: 2};
 Memory.crewList.upgrader= {body: [CARRY, CARRY, WORK, WORK, WORK, MOVE, MOVE, MOVE], number :2, order: 3};
-Memory.crewList.builder= {body: [WORK, WORK, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE], number :2, order: 4};
+Memory.crewList.builder= {body: [WORK, WORK, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE], number :3, order: 4};
 
 // manage crew
+Game.spawns["Spawn1"].spawnCreep([MOVE,MOVE,WORK,WORK,CARRY,CARRY],"mob",{memory:{job:"mob"}});
 Game.creeps["builder"].memory.job = "builder";
-
 delete Game.creeps["miner18577189"].post;
+creep.moveTo(Game.getObjectById("5ecced7e929e2d96f1d302ca"));
+
 
 // sleeping spot
 Memory.sleepingSpot = {x: 17, y:17};
