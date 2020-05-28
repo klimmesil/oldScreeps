@@ -20,7 +20,13 @@ var manageCrew = {
         spawn.pos.y);
         console.log("Spawning " + newName + " !");
     } else {
+      var order = [];
       for (var jobName in jobNames){
+        order[(jobNames[jobName].order)] = jobName;
+      }
+      for (var i in order){
+        var jobName = order[i];
+
         var alive = spawn.room.find(FIND_MY_CREEPS, {filter: (creep) => (creep.memory.job == jobName)});
         var number = jobNames[jobName].number;
 

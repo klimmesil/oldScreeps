@@ -5,16 +5,14 @@ var jobBuilder = require('job.builder');
 var jobMiner = require('job.miner');
 var jobHauler = require('job.hauler');
 
+//** All functions **/
+var funcDebug = require('func.debug');
+var funcStruct = require('func.structures');
+
 /** Management **/
 var manageCrew = require("manage.crew");
 
 module.exports.loop = function(){
-  console.log("________________________________________________" + Game.time);
-
-  /** Management **/
-  manageCrew.deaths();
-  manageCrew.respawn(Game.spawns["Spawn1"]);
-  manageCrew.reorganize(Game.spawns["Spawn1"].room);
 
   /** Screeps **/
   for (var name in Game.creeps){
@@ -24,24 +22,33 @@ module.exports.loop = function(){
 
     switch (job){
       case "harvester":
-        jobHarvester.run(creep, true);
+        jobHarvester.run(creep, 2);
         break;
 
       case "upgrader":
-        jobUpgrader.run(creep, true);
+        jobUpgrader.run(creep, 2);
         break;
 
       case "builder":
-        jobBuilder.run(creep, true);
+        jobBuilder.run(creep, 2);
         break;
 
       case "miner":
-        jobMiner.run(creep, true);
+        jobMiner.run(creep, 2);
         break;
 
       case "hauler":
-        jobHauler.run(creep,true);
+        jobHauler.run(creep, 2);
         break;
     }
   }
+
+  /** debugging **/
+  console.log("________________________________________________" + Game.time);
+  funcDebug.markDamaged(Game.spawns["Spawn1"].room);
+
+  /** Management **/
+  manageCrew.deaths();
+  manageCrew.respawn(Game.spawns["Spawn1"]);
+  manageCrew.reorganize(Game.spawns["Spawn1"].room);
 }

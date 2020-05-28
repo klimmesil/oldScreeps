@@ -3,6 +3,10 @@ var funcStruct = require("func.structures");
 var jobBuilder = {
     /** @param {Creep} creep **/
     run : function(creep, debug){
+      //tell job
+      if (debug == 2) creep.say("🏗️");
+
+
       // decide wether we are building or harvesting
       if (creep.memory.upping && creep.store.getUsedCapacity() == 0){
         creep.memory.upping = false;
@@ -13,12 +17,15 @@ var jobBuilder = {
       // building or repairing
       if (creep.memory.upping){
         // see if someone needs repairs
-        var target = creep.pos.findClosestByRange(FIND_STRUCTURES, {filter: (structure) => (structure.hits < structure.hitsMax &&
-                                                                                            structure.structureType != STRUCTURE_WALL &&
-                                                                                            !(funcStruct.watched(structure))   )});
+        // TEMPORARY
+        // var target = creep.pos.findClosestByRange(FIND_STRUCTURES, {filter: (structure) => (structure.hits < structure.hitsMax &&
+        //                                                                                     structure.structureType != STRUCTURE_WALL &&
+        //                                                                                   !(funcStruct.watched(structure))   )});
+        var target = undefined;
+
         if (target) {
           // repair
-          if (debug) creep.say("🛠️" + target.structureType);
+          if (debug == 1) creep.say("🛠️" + target.structureType);
           if (creep.repair(target) == ERR_NOT_IN_RANGE){
             creep.moveTo(target, {visualizePathStyle: {stroke: "#04eb0b"}});
           }
@@ -26,7 +33,7 @@ var jobBuilder = {
           // build
           target = creep.pos.findClosestByRange(FIND_MY_CONSTRUCTION_SITES);
           if(target){
-            if (debug && target) creep.say ("🏗️" + target.structureType);
+            if (debug == 1 && target) creep.say ("🏗️" + target.structureType);
             if (creep.build(target) == ERR_NOT_IN_RANGE){
               creep.moveTo(target, {visualizePathStyle: {stroke: "#04eb0b"}});
             }
@@ -35,7 +42,7 @@ var jobBuilder = {
           // sleeping
           else {
             creep.moveTo (Memory.sleepingSpot.x, Memory.sleepingSpot.y, {visualizePathStyle: {stroke: "#f12dec"}});
-            if (debug) creep.say("😴");
+            if (debug == 1) creep.say("😴");
           }
 
         }
@@ -43,11 +50,19 @@ var jobBuilder = {
 
       // refill
       } else {
-        if (debug) creep.say("⚡");
+        if (debug == 1) creep.say("⚡");
         var containers = creep.room.find(FIND_STRUCTURES, {filter: (structure)=>(structure.structureType == STRUCTURE_CONTAINER && structure.store.getUsedCapacity(RESOURCE_ENERGY) > 50)});
         var container = creep.pos.findClosestByRange(containers);
         if (creep.withdraw(container, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE){
           creep.moveTo(container, {visualizePathStyle: {stroke: "#e0f015"}});
+        }
+
+        // TEMPORARY
+        if (!container){
+          container = creep.pos.findClosestByRange(FIND_SOURCES);
+          if (creep.harvest(container) == ERR_NOT_IN_RANGE){
+            creep.moveTo(container, {visualizePathStyle: {stroke: "#e0f015"}});
+          }
         }
       }
     }
