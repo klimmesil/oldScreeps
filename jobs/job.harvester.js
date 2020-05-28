@@ -1,3 +1,5 @@
+var funcCreeps = require("func.creeps");
+
 var jobHarvester = {
     /** @param {Creep} creep **/
     run : function(creep, debug){
@@ -16,7 +18,7 @@ var jobHarvester = {
         if (!target) target = creep.pos.findClosestByRange(targets, {filter: (structure) => (structure.structureType == STRUCTURE_CONTAINER)});
 
         if (debug == 1){
-          if (!target) creep.say("😴");
+          if (!target) funcCreeps.sleep(creep, debug);
           else creep.say("⚡➡️"+target.structureType);
         }
         if (creep.transfer(target, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE){

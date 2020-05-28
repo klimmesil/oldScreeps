@@ -1,3 +1,5 @@
+var funcCreeps = require("func.creeps");
+
 var jobHauler = {
     /** @param {Creep} creep **/
     run : function(creep, debug){
@@ -25,8 +27,7 @@ var jobHauler = {
 
         // no target, going to sleep
         if (!target){
-          creep.moveTo (Memory.sleepingSpot.x, Memory.sleepingSpot.y, {visualizePathStyle: {stroke: "#f12dec"}});
-          if (debug == 1) creep.say("😴");
+          funcCreeps.sleep(creep, debug);
         }
 
         // target, going to transfer

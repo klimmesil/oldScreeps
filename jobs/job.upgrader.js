@@ -1,8 +1,10 @@
+var funcCreeps = require("func.creeps");
+
 var jobUpgrader = {
     /** @param {Creep} creep **/
     run : function(creep, debug){
       // tell job
-      if (debug == 2) creep.say(⏫);
+      if (debug == 2) creep.say("⏫");
 
       // deciding if upping or filling
       if (creep.memory.upping && creep.store.getUsedCapacity() == 0){

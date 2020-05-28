@@ -1,4 +1,5 @@
 var funcStruct = require("func.structures");
+var funcCreeps = require("func.creeps");
 
 var jobBuilder = {
     /** @param {Creep} creep **/
@@ -41,15 +42,14 @@ var jobBuilder = {
 
           // sleeping
           else {
-            creep.moveTo (Memory.sleepingSpot.x, Memory.sleepingSpot.y, {visualizePathStyle: {stroke: "#f12dec"}});
-            if (debug == 1) creep.say("😴");
+            funcCreeps.sleep(creep, debug);
           }
 
         }
-
+      } 
 
       // refill
-      } else {
+      else {
         if (debug == 1) creep.say("⚡");
         var containers = creep.room.find(FIND_STRUCTURES, {filter: (structure)=>(structure.structureType == STRUCTURE_CONTAINER && structure.store.getUsedCapacity(RESOURCE_ENERGY) > 50)});
         var container = creep.pos.findClosestByRange(containers);

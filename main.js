@@ -8,6 +8,7 @@ var jobHauler = require('job.hauler');
 //** All functions **/
 var funcDebug = require('func.debug');
 var funcStruct = require('func.structures');
+var funcCreeps = require("func.creeps");
 
 /** Management **/
 var manageCrew = require("manage.crew");
