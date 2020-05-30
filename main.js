@@ -14,6 +14,14 @@ var funcCreeps = require("func.creeps");
 var manageCrew = require("manage.crew");
 
 module.exports.loop = function(){
+  /** debugging **/
+  console.log("________________________________________________" + Game.time);
+  funcDebug.markDamaged(Game.spawns["Spawn1"].room);
+
+  /** Management **/
+  manageCrew.deaths();
+  manageCrew.respawn(Game.spawns["Spawn1"]);
+  manageCrew.reorganize(Game.spawns["Spawn1"].room);
 
   /** Screeps **/
   for (var name in Game.creeps){
@@ -43,19 +51,10 @@ module.exports.loop = function(){
         break;
 
       case "mob":
-        var target = Game.getObjectById("5ecced7e929e2d96f1d302ca");
-        if (creep.store.getUsedCapacity(RESOURCE_ENERGY)==0) creep.withdraw(target, RESOURCE_ENERGY);
-        else jobBuilder.run(creep, 1);
+        var target = Game.flags.mob;
+        console.log("mob debugging : " + creep.moveTo(target));
         break;
     }
   }
 
-  /** debugging **/
-  console.log("________________________________________________" + Game.time);
-  funcDebug.markDamaged(Game.spawns["Spawn1"].room);
-
-  /** Management **/
-  manageCrew.deaths();
-  manageCrew.respawn(Game.spawns["Spawn1"]);
-  manageCrew.reorganize(Game.spawns["Spawn1"].room);
 }
