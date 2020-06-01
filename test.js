@@ -7,13 +7,15 @@ delete Memory.miningSites['5ece6c910ad73f6e796fcbeb'].miner;
 
 // manage spawning
 Memory.crewList.harvester = {body: [CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE], number :0, order: 0};
-Memory.crewList.hauler = {body: [CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE], number: 1, order: 1};
+Memory.crewList.hauler = {body: [CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE], number: 2, order: 1};
 Memory.crewList.miner = {body: [MOVE,CARRY,WORK,WORK,WORK,WORK,WORK,WORK,WORK], number: 2, order: 2};
 Memory.crewList.upgrader = {body: [CARRY, WORK, WORK, WORK, WORK, WORK, MOVE, MOVE, MOVE, MOVE], number :3, order: 3};
-Memory.crewList.builder = {body: [WORK, WORK, WORK, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE,MOVE], number :4, order: 4};
+Memory.crewList.reserver = {body: [MOVE, CLAIM], number: 1, order:4};
+Memory.crewList.builder = {body: [WORK, WORK, WORK, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE,MOVE], number :4, order: 5};
 
 // manage crew
-Game.spawns["Spawn1"].spawnCreep([MOVE,MOVE,MOVE, MOVE, WORK, CARRY, CARRY,CARRY],"mob",{memory:{job:"mob"}});
+Game.spawns["Spawn1"].spawnCreep([MOVE, CARRY, WORK, WORK, WORK, WORK],"minerss",{memory:{job:"miner"}});
+
 Game.creeps["builder"].memory.job = "builder";
 delete Game.creeps["miner18577189"].post;
 creep.moveTo(Game.getObjectById("5ecced7e929e2d96f1d302ca"));

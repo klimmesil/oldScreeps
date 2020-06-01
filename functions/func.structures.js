@@ -11,7 +11,8 @@ var funcStruct = {
   // gives all the default requesters (ext, spawn)
   getRequesters: function (creep){
     var targets = creep.room.find(FIND_STRUCTURES, {filter: (structure) => (((structure.structureType == STRUCTURE_SPAWN)||
-                                                                            (structure.structureType == STRUCTURE_EXTENSION))&&
+                                                                            (structure.structureType == STRUCTURE_EXTENSION)||
+                                                                          structure.structureType == STRUCTURE_STORAGE)&&
                                                                             structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0)});
 
 

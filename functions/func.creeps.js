@@ -48,7 +48,7 @@ var funcCreeps = {
 
   //////////////////////////////////////////////////////////////////////////////////////////////////////////
   // hauls to requesters (default requesters are the extensions and spawns)
-  haul: function(creep, debug, requesters){
+  haul: function(creep, debug, requesters, priority){
     // default sources
     if (requesters.length == 0){
       requesters = funcStruct.getRequesters(creep);
@@ -57,6 +57,17 @@ var funcCreeps = {
     // everything is full
     if (requesters.length == 0){
       return false;
+    }
+
+    // priority
+    if (priority.length>0){
+      for (var i in priority){
+        var b = requesters.filter((s)=>(priority[i].includes(s.structureType)));
+        if (b.length!=0){
+          requesters = b; // if priority objects, focus only on them
+          break;
+        }
+      }
     }
 
     // go transfer
@@ -74,7 +85,7 @@ var funcCreeps = {
   // works
   work: function(creep, debug, conditions){
     // look for a task (no task / priority is not yet respected)
-    if (!creep.memory.task||(conditions.priority && Memory.taskList[creep.memory.task].work != conditions.work)){
+    if (!Memory.taskList[creep.memory.task]||(conditions.priority && Memory.taskList[creep.memory.task].work != conditions.work)){
       var job = creep.memory.job;
 
       // define the filter
@@ -113,7 +124,7 @@ var funcCreeps = {
     }
 
     // if he has one, work
-    if (creep.memory.task){
+    if (Memory.taskList[creep.memory.task]){
       var task = Memory.taskList[creep.memory.task];
       var structure = Game.getObjectById(creep.memory.task);
 
@@ -142,6 +153,73 @@ var funcCreeps = {
       sum += costs[body[i]];
     }
     return sum;
+  },
+
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////
+  // go work at his post
+  workAtPost: function(creep, debug){
+    if (!creep.memory.post){
+      return false;
+    }
+
+    var id = creep.memory.post;
+    var job = creep.memory.job;
+
+    switch(job){
+      case "reserver":
+        var controller = Game.getObjectById(id);
+        var info = Memory.reservedList[id];
+
+        // move to room
+        if (!controller){
+          var flag = Game.flags[info.roomName];
+          creep.moveTo(flag, {visualizePathStyle : {stroke: "#e0f015"}});
+        }
+
+        // go work on the controller
+        else {
+          if (creep.reserveController(controller) == ERR_NOT_IN_RANGE) creep.moveTo(controller, {visualizePathStyle : {stroke: "#e0f015"}});
+        }
+
+        break;
+
+      case "miner":
+        var container = Game.getObjectById(id);
+        var info = Memory.miningSites[id];
+        var energy = info.energy;
+        var source = Game.getObjectById(info.mining);
+
+        creep.moveTo(container, {visualizePathStyle: {stroke: "#e0f015"}});
+
+        // decide repair or mine
+        if (!creep.memory.upping && container.hits < container.hitsMax && creep.store.getFreeCapacity(RESOURCE_ENERGY) == 0){
+          creep.memory.upping = true;
+          if (debug > 1) console.log("Starting to repair container pos (" + container.pos.x + ", " + container.pos.y + ")");
+        } else if (creep.memory.upping && (container.hits == container.hitsMax || creep.store.getUsedCapacity(RESOURCE_ENERGY) == 0)){
+          creep.memory.upping = false;
+          if (debug > 1 && container.hits == container.hitsMax) console.log("Container repair done pos ("+container.pos.x + ", " + container.pos.y + ")");
+        }
+
+        // repair
+        if (creep.memory.upping){
+          if (debug == 1) creep.say("🛠️");
+          creep.repair(container);
+        }
+
+        // transfer
+        else if (creep.store.getFreeCapacity() == 0){
+          if (debug == 1) creep.say("⚡➡️");
+          creep.transfer(container, energy);
+        }
+
+        // refuel
+        else{
+          if (debug == 1) creep.say("⚡");
+          if (creep.harvest(source) == ERR_NOT_IN_RANGE){
+            console.log("Something is wrong with my container pos (" + container.pos.x + ", " + container.pos.y +")");
+          }
+        }
+    }
   }
 };
 

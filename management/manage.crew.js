@@ -49,11 +49,13 @@ var manageCrew = {
       }
       for (var i in order){
         var jobName = order[i];
-
-        var alive = spawn.room.find(FIND_MY_CREEPS, {filter: (creep) => (creep.memory.job == jobName)});
+        var alive = 0;
+        for (var j in Game.creeps){
+          if (Game.creeps[j].memory.job == jobName) alive += 1;
+        }
         var number = jobNames[jobName].number;
 
-        if (number > alive.length){
+        if (number > alive){
           var body = jobNames[jobName].body;
           var newName = jobName + Game.time;
           console.log("Spawning " + newName + " !" + spawn.spawnCreep(body, newName, {memory: {job: jobName}}));
@@ -68,6 +70,9 @@ var manageCrew = {
   reorganize : function(room){
     // mines
     manageLists.reorganizeMines(room);
+
+    // claims
+    manageLists.reorganizeReservation(room);
 
     // repairs
     manageLists.reorganizeRepairs(room);

@@ -5,12 +5,12 @@ var jobHauler = {
     run : function(creep, debug){
       // tell job
       if (debug == 2) creep.say("🏎️");
-      
+
       // refill if necessary
       if(funcCreeps.refill(creep, debug, [], false));
 
       // transfer
-      else if(funcCreeps.haul(creep, debug, []));
+      else if(funcCreeps.haul(creep, debug, [], [[STRUCTURE_SPAWN,STRUCTURE_EXTENSION], [STRUCTURE_TOWER]]));
 
       // force refill
       else if(funcCreeps.refill(creep, debug, [], true));

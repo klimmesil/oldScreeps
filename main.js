@@ -4,6 +4,7 @@ var jobUpgrader = require('job.upgrader');
 var jobBuilder = require('job.builder');
 var jobMiner = require('job.miner');
 var jobHauler = require('job.hauler');
+var jobReserver = require('job.reserver');
 
 //** All functions **/
 var funcDebug = require('func.debug');
@@ -49,6 +50,10 @@ module.exports.loop = function(){
       case "hauler":
         jobHauler.run(creep, 2);
         break;
+
+      case "reserver":
+        jobReserver.run(creep, 2);
+        break
 
       case "mob":
         var target = Game.flags.mob;

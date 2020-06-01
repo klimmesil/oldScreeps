@@ -1,6 +1,6 @@
 var funcStruct = require("func.structures");
 
-var manageCrew = {
+var manageLists = {
   //////////////////////////////////////////////////////////////////////////////////////////////////////////
   // reorganize miners, and containers
   reorganizeMines : function(room){
@@ -28,6 +28,33 @@ var manageCrew = {
   },
 
   //////////////////////////////////////////////////////////////////////////////////////////////////////////
+  // reorganize controllers and reservers
+  reorganizeReservation : function(room){
+    for (var id in Memory.reservedList){
+      var controller = Game.getObjectById(id);
+      var info = Memory.reservedList[id];
+
+      // one controller has no reserver or reserver is dead
+      if (!Game.creeps[info.reserver]){
+        var vacantReservers = room.find(FIND_MY_CREEPS, {filter: (creep) => (creep.memory.job == "reserver" && !creep.memory.post)});
+
+        // there are no miners left
+        if (vacantReservers.length == 0){
+          console.log("Controller is missing a reserver. (" + controller + ") room " + room.name);
+          info.reserver = null;
+        }
+
+        // there is a miner
+        else {
+          vacantReservers[0].memory.post = id;
+          info.reserver = vacantReservers[0].name;
+          console.log("Vacant reserver " + info.reserver + " is now working at controller pos (" + controller.pos.x + ", " + controller.pos.y + ")");
+        }
+      }
+    }
+  },
+
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////
   // reorganize broken
   reorganizeRepairs: function(room){
     // get all repairs
@@ -37,7 +64,7 @@ var manageCrew = {
     for (var i in broken) {
       var structure = broken[i];
       var id = structure.id;
-      
+
       // if not already done, put it in the taskList
       if (!Memory.taskList[id]){
         Memory.taskList[id] = {
@@ -51,6 +78,8 @@ var manageCrew = {
     }
   },
 
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////
+  // reorganize builds
   reorganizeBuilds: function(room) {
     // get all building sites
     var buildingSites = room.find(FIND_MY_CONSTRUCTION_SITES);
@@ -101,8 +130,11 @@ var manageCrew = {
       else {
         for (var i in task.workers){
           var name = task.workers[i];
-          if (!Game.creeps[name]){
+          var creep = Game.creeps[name];
+          if (!creep){
             task.workers.splice(i, 1);
+          } else {
+            creep.memory.task = id;
           }
         }
       }
@@ -110,4 +142,4 @@ var manageCrew = {
   }
 };
 
-module.exports = manageCrew;
+module.exports = manageLists;
