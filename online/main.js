@@ -60,6 +60,8 @@ module.exports.loop = function(){
         console.log("mob debugging : " + creep.moveTo(target));
         break;
     }
+
+
   }
 
 }
