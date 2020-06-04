@@ -220,6 +220,25 @@ var funcCreeps = {
           }
         }
     }
+  },
+
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////
+  // get all the hostile creeps
+  getHostiles: function(room){
+    var f = function(creep){
+      // vars
+      const danger = [WORK,ATTACK,RANGED_ATTACK,HEAL];
+
+      // check for dangerous parts
+      for (var i in creep.body){
+        if (danger.includes(creep.body[i].type)) return true;
+      }
+
+      // else safe
+      return false;
+    }
+    var hostiles = room.find(FIND_HOSTILE_CREEPS, {filter: f});
+    return hostiles;
   }
 };
 

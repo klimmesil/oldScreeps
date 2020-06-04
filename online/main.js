@@ -32,27 +32,27 @@ module.exports.loop = function(){
 
     switch (job){
       case "harvester":
-        jobHarvester.run(creep, 2);
+        jobHarvester.run(creep, 0);
         break;
 
       case "upgrader":
-        jobUpgrader.run(creep, 2);
+        jobUpgrader.run(creep, 0);
         break;
 
       case "builder":
-        jobBuilder.run(creep, 2);
+        jobBuilder.run(creep, 0);
         break;
 
       case "miner":
-        jobMiner.run(creep, 2);
+        jobMiner.run(creep, 0);
         break;
 
       case "hauler":
-        jobHauler.run(creep, 2);
+        jobHauler.run(creep, 0);
         break;
 
       case "reserver":
-        jobReserver.run(creep, 2);
+        jobReserver.run(creep, 0);
         break
 
       case "mob":
@@ -62,6 +62,17 @@ module.exports.loop = function(){
     }
 
 
+  }
+
+  // turret control
+  var turrets = Game.spawns["Spawn1"].room.find(FIND_MY_STRUCTURES, {filter: (s) => (s.structureType == STRUCTURE_TOWER)});
+  for (var i in turrets){
+    var turret = turrets[i];
+    var enemies = funcCreeps.getHostiles(turret.room);
+    if (enemies.length > 0){
+      var enemy = enemies[0];
+      turret.attack(enemy);
+    }
   }
 
 }

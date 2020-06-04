@@ -6,12 +6,10 @@ delete Memory.miningSites['5ece6c910ad73f6e796fcbeb'].miner;
 delete Memory.miningSites['5ece6c910ad73f6e796fcbeb'].miner;
 
 // manage spawning
-Memory.crewList.harvester = {body: [CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE], number :0, order: 0};
-Memory.crewList.hauler = {body: [CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE], number: 2, order: 1};
-Memory.crewList.miner = {body: [MOVE,CARRY,WORK,WORK,WORK,WORK,WORK,WORK,WORK], number: 2, order: 2};
-Memory.crewList.upgrader = {body: [CARRY, WORK, WORK, WORK, WORK, WORK, MOVE, MOVE, MOVE, MOVE], number :2, order: 3};
-Memory.crewList.reserver = {body: [MOVE, CLAIM], number: 0, order:4};
-Memory.crewList.builder = {body: [WORK, WORK, WORK, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE,MOVE], number :2, order: 5};
+Memory.spawnOrder = [];
+Memory.spawnOrder[0] = {body: [MOVE, CARRY, WORK], job: "harvester", number: 0};
+Memory.spawnOrder[1] = {body: [MOVE, CARRY, CARRY], job: "hauler", number: 1};
+Memory.spawnOrder[2] = {body: [MOVE, CARRY, WORK], job: "miner", number: 1};
 
 // manage crew
 Game.spawns["Spawn1"].spawnCreep([MOVE, CARRY, WORK, WORK, WORK, WORK],"minerss",{memory:{job:"miner"}});
