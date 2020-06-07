@@ -1,10 +1,38 @@
 var funcDebug = require("func.debug");
+var funcStruct = require("func.structures");
 
 var manageLists = {
   //////////////////////////////////////////////////////////////////////////////
   // reorganize containers
-  reorganizeContainers: function(room){
-    //for (var i in containers);
+  reorganizeBroken: function(room){
+    var broken = funcStruct.getBroken(room);
+
+    if (!Memory.broken[room.name]) Memory.broken[room.name] = {};
+
+    // check and delete old ones
+    for (var id in Memory.broken[room.name]){
+      var obj = Game.getObjectById(id);
+      if (!obj || funcStruct.checkRepaired(obj)){
+        // delete all posts
+        for (var i in Memory.broken[room.name][id].workers){
+          Game.creeps[i].memory.post = null;
+        }
+
+        // delete task
+        delete Memory.borken[room.name][id];
+      }
+    }
+
+    // if a worker stops working, he will uncheck his box alone
+
+    // add new ones
+    for (var i in broken){
+      var id = broken.id;
+
+      if (!Memory.broken[room.name][id]){
+        Memory.broken[room.name][id] = {number: 1, workers: {}};
+      }
+    }
   },
 
 
@@ -28,7 +56,7 @@ var manageLists = {
       // just a quick check for each source
       for (var j in Memory.sources[i]){
         var info = Memory.sources[i][j];
-        if (!Game.creeps[info.miner]) info.miner = null; // reset miner
+        // miner will automaticly uncheck if necessary
 
         // look for an employee
         if (!info.miner){
@@ -39,6 +67,7 @@ var manageLists = {
             info.miner = chosen.name;
             chosen.memory.post = j;
             chosen.memory.postRoom = i;
+            console.log("Miner", chosen.name,"now works at source.");
           }
         }
 
@@ -85,6 +114,9 @@ var manageLists = {
       // will stock containers and info about them
       Memory.containers = {};
 
+      // will see which things need repairs
+      Memory.broken = {};
+
       // will keep track of how much creeps we wanna have
       Memory.spawnOrder = [
         {body: [MOVE, CARRY, WORK], job: "harvester", number: 0},
@@ -116,6 +148,9 @@ var manageLists = {
       var room = Game.rooms[i];
       // reorganize sources (mines for real...)
       this.reorganizeSources(room);
+
+      // reorganize broken things
+      this.reorganizeBroken(room);
 
     }
   }

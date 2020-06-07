@@ -122,8 +122,39 @@ var manageCrew = {
 
       // if he's dead
       if (!creep){
+        var announceDeath = "☠️ RIP " + name
+
+
+        var memory = Memory.creeps[name];
+        // if he had a post, delete it
+        if (memory.post){
+          // delete from mines
+          if (memory.job == "miner"){
+            Memory.sources[memory.post].miner = null;
+            announceDeath += "... Unchecked his mining";
+          }
+
+          // builder...
+          else if (memory.job == "builder"){
+            var post = Game.getObjectById(memory.post);
+            if (!post);
+
+            // if he was contructing
+            else if (post.progress){
+              Memory.constructing[post.room][post.id].workers[name] = undefined;
+              announceDeath += "... Unchecked his construction."
+            }
+
+            // if he was repairing
+            else{
+              Memory.broken[post.room][post.id].workers[name] = undefined;
+              announceDeath += "... Unchecked his repairs."
+            }
+          }
+        }
+
         // :'(
-        console.log("☠️ RIP " + name);
+        console.log(announceDeath);
 
         // delete his memory
         delete Memory.creeps[name];

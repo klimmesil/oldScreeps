@@ -2,6 +2,7 @@ var funcStruct = {
   //////////////////////////////////////////////////////////////////////////////////////////////////////////
   // tells if the structure is watched by a miner
   watched: function (structure){
+    return (structure.structureType == STRUCTURE_CONTAINER && Memory.containers[structure.id].job == "mining" && Game.creeps[Memory.sources[structure.room.name][Memory.containers[structure.id].source].miner]);
   },
 
   //////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -46,16 +47,34 @@ var funcStruct = {
   },
 
   //////////////////////////////////////////////////////////////////////////////////////////////////////////
+  // check if s is broken
+  checkBroken: function(s){
+    return (
+      s.hits < s.hitsMax && ( // broken
+        // go see Memory.repairConditions
+        (Memory.repairConditions[s.structureType].type == "hits" && s.hits < Memory.repairConditions[s.structureType].start)||
+        (s.hits < Memory.repairConditions[s.structureType].start*s.hitsMax)
+      )
+    );
+  },
+
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////
+  // check if s is done repairing
+  checkRepaired: function(s){
+    return (
+      s.hits == s.hitsMax || ( // broken
+        // go see Memory.repairConditions
+        (Memory.repairConditions[s.structureType].type == "hits" && s.hits >= Memory.repairConditions[s.structureType].stop)||
+        (s.hits >= Memory.repairConditions[s.structureType].stop*s.hitsMax)
+      )
+    );
+  },
+
+
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////
   // gives you all the broken
   getBroken: function(room){
-    var f = function(s){
-      return (
-        s.hits < s.hitsMax && // broken
-        (s.hits < Memory.repairConditions[s.structureType].start) // go see Memory.repairConditions
-      );
-    }
-
-    var targets = room.find(FIND_STRUCTURES, {filter: f});
+    var targets = room.find(FIND_STRUCTURES, {filter: this.checkBroken});
     return targets;
   }
 };

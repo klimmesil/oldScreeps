@@ -111,7 +111,6 @@ var funcCreeps = {
     var postObj = Game.getObjectById(post);
     var dist = creep.pos.getRangeTo(postObj);
     if (dist > 0){
-      console.log("we are travelling, same room",dist, postObj.pos.x,postObj.pos.y);
       if (debug == 1) creep.say("🏍️");
       creep.moveTo(postObj, {visualizePathStyle: {}});
       return true;
@@ -120,6 +119,79 @@ var funcCreeps = {
 
   },
 
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////
+  // repairs
+  // opt = {force: bool (= false)}
+  repair: function(creep, debug, opt){
+    var postID = creep.memory.post;
+    var post = Game.getObjectById(postID);
+
+    // failSafe: repair job, not forced and requirements
+    if (post && post.progress && !forced && Object.keys(Memory.broken[creep.room.name][postID].workers).length > Memory.broken[creep.room.name][postID].number){
+      Memory.broken[creep.room.name][postID].workers[creep.name] = undefined; // delete from list
+      creep.memory.post = undefined; // delete from memory
+    }
+
+    // no job
+    if (!post || !post.progress){
+      // vars
+      var forced = opt.forced;
+      var n = 1;
+      var complete = true;
+      var done = false;
+
+      // no job look for a task
+      do {
+        complete = true
+        for (var id in Memory.broken[creep.room.name]){
+          var obj = Game.getObjectById(id);
+          var number = Memory.broken[creep.room.name][id].number;
+          var workers = Memory.broken[creep.room.name][id].workers;
+          var workerCount = Object.keys(workers).length;
+
+          if (n < number) complete = false;
+
+          // just take the job whatever.
+          if (forced && n > workerCount){
+            creep.memory.post = id;
+            Memory.broken[creep.room.name][id].workers[creep.name] = true;
+            done = true;
+          }
+
+          // take the job if if if if...
+          else if (!forced && n > workerCount && n <= number){
+            creep.memory.post = id;
+            Memory.broken[creep.room.name][id].workers[creep.name] = true;
+            done = true;
+          }
+        }
+
+
+      } while (Object.keys(Memory.broken[creep.room.name]).length > 0 && (!done || (!foced && complete) ) ); // done if everything is repaired found a job OR all jobs meet creep requirements (and not forced)
+
+      post = Game.getObjectById(creep.memory.post);
+    }
+
+
+    if (!post || !post.progress) return false; // no job found
+
+
+    // else, job and work!
+    var dist = creep.pos.getRangeTo(post);
+    if (dist > 3) creep.moveTo(post, {visualizePathStyle: {}});
+    else creep.repair(post);
+
+    return true
+
+  },
+
+
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////
+  // builds things
+  // opt = {}
+  build: function(creep, debug, opt){
+
+  },
 
   //////////////////////////////////////////////////////////////////////////////////////////////////////////
   // function that tells cost of body
