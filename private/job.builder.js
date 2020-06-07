@@ -17,6 +17,11 @@ var jobBuilder = {
 
     // try to build
     else if (funcCreeps.build(creep, debug, {}));
+
+    else {
+      funcCreeps.sleep(creep, debug, {});
+      if (debug == 1) creep.say("😴");
+    }
   }
 }
 

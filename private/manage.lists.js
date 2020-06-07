@@ -3,7 +3,7 @@ var funcStruct = require("func.structures");
 
 var manageLists = {
   //////////////////////////////////////////////////////////////////////////////
-  // reorganize containers
+  // reorganize broken
   reorganizeBroken: function(room){
     var broken = funcStruct.getBroken(room);
 
@@ -16,6 +16,7 @@ var manageLists = {
         // delete all posts
         for (var i in Memory.broken[room.name][id].workers){
           Game.creeps[i].memory.post = null;
+            Game.creeps[i].memory.postRoom = null;
         }
 
         // delete task
@@ -27,7 +28,7 @@ var manageLists = {
 
     // add new ones
     for (var i in broken){
-      var id = broken.id;
+      var id = broken[i].id;
 
       if (!Memory.broken[room.name][id]){
         Memory.broken[room.name][id] = {number: 1, workers: {}};
@@ -35,6 +36,39 @@ var manageLists = {
     }
   },
 
+  //////////////////////////////////////////////////////////////////////////////
+  // reorganize constructions
+  reorganizeConstructions: function(room){
+    var constructionSites = room.find(FIND_MY_CONSTRUCTION_SITES);
+
+    if (!Memory.constructing[room.name]) Memory.constructing[room.name] = {};
+
+    // check for old ones done
+    for (var id in Memory.constructing[room.name]){
+      var site = !Game.getObjectById(id);
+
+      if (!site || !site.progress){
+
+        // delete posts
+        for (var name in Memory.constructing[room.name][id].workers){
+          Game.creeps[name].memory.post = null;
+          Game.creeps[name].memory.postRoom = null;
+        }
+
+        // delete from list
+        delete Memory.constructing[room.name][id];
+      }
+    }
+
+    // add new ones
+    for (var i in constructionSites){
+      var id = constructionSites[i].id;
+
+      if (!Memory.constructing[room.name][id]){
+        Memory.constructing[room.name][id] = {number: 2, workers: {}};
+      }
+    }
+  },
 
   //////////////////////////////////////////////////////////////////////////////
   // reorganize sources
@@ -117,6 +151,9 @@ var manageLists = {
       // will see which things need repairs
       Memory.broken = {};
 
+      // will see all the constructions
+      Memory.constructing = {};
+
       // will keep track of how much creeps we wanna have
       Memory.spawnOrder = [
         {body: [MOVE, CARRY, WORK], job: "harvester", number: 0},
@@ -146,12 +183,15 @@ var manageLists = {
 
     for (var i in Memory.reservedRooms){
       var room = Game.rooms[i];
-      // reorganize sources (mines for real...)
-      this.reorganizeSources(room);
 
       // reorganize broken things
       this.reorganizeBroken(room);
 
+      // reorganizeConstructions;
+      this.reorganizeConstructions(room);
+
+      // reorganize sources (mines for real...)
+      this.reorganizeSources(room);
     }
   }
 };

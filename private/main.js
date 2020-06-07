@@ -19,9 +19,9 @@ var manageBuilds = require("manage.builds");
 
 // all constants
 const debugging = {
-  harvester: 1,
-  hauler: 1,
-  miner: 1,
+  harvester: 0,
+  hauler: 0,
+  miner: 0,
   upgrader: 1,
   builder: 1,
   damaged: 1,
@@ -31,7 +31,7 @@ const debugging = {
 
 // main paragraph
 module.exports.loop = function() {
-
+    
   // new tick
   console.log("________" + Game.time + "______________________________________________");
 

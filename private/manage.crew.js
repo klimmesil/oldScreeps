@@ -130,7 +130,7 @@ var manageCrew = {
         if (memory.post){
           // delete from mines
           if (memory.job == "miner"){
-            Memory.sources[memory.post].miner = null;
+            Memory.sources[memory.postRoom][memory.post].miner = null;
             announceDeath += "... Unchecked his mining";
           }
 
@@ -181,6 +181,7 @@ var manageCrew = {
         // vars
         var jobName = spawnOrder[i].job;
         var alive = 0;
+
 
         // count the number already alive
         for (var j in Game.creeps){
