@@ -62,12 +62,17 @@ var manageBuilds = {
     }
   },
 
+  ///////////////////////////////////////////////////////////////////////////////////
+  // builds things
   restructure: function(){
     for (var i in Memory.reservedRooms){
       var room = Game.rooms[i];
 
-      // build
-      this.buildMiningContainers(room);
+      // timed ticks
+      if (Game.time%5 === 0){
+        // build
+        this.buildMiningContainers(room);
+      }
     }
   }
 };

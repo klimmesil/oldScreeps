@@ -1,4 +1,6 @@
 var manageCrew = {
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////
+  // try to save the colony
   failSafe: function(){
     if (Memory.failSafe !== undefined){
       var spawn = Game.spawns[Memory.failSafe.spawnName];
@@ -124,30 +126,28 @@ var manageCrew = {
       if (!creep){
         var announceDeath = "☠️ RIP " + name
 
-
-        var memory = Memory.creeps[name];
         // if he had a post, delete it
-        if (memory.post){
+        if (Memory.creeps[name].post){
           // delete from mines
-          if (memory.job == "miner"){
-            Memory.sources[memory.postRoom][memory.post].miner = null;
+          if (Memory.creeps[name].job == "miner"){
+            Memory.sources[Memory.creeps[name].postRoom][Memory.creeps[name].post].miner = null;
             announceDeath += "... Unchecked his mining";
           }
 
           // builder...
-          else if (memory.job == "builder"){
-            var post = Game.getObjectById(memory.post);
+          else if (Memory.creeps[name].job == "builder"){
+            var post = Game.getObjectById(Memory.creeps[name].post);
             if (!post);
 
             // if he was contructing
             else if (post.progress){
-              Memory.constructing[post.room][post.id].workers[name] = undefined;
+              Memory.constructing[Memory.creeps[name].postRoom][post.id].workers[name] = undefined;
               announceDeath += "... Unchecked his construction."
             }
 
             // if he was repairing
             else{
-              Memory.broken[post.room][post.id].workers[name] = undefined;
+              Memory.broken[Memory.creeps[name].postRoom][post.id].workers[name] = undefined;
               announceDeath += "... Unchecked his repairs."
             }
           }

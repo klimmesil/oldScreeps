@@ -3,6 +3,89 @@ var funcStruct = require("func.structures");
 
 var manageLists = {
   //////////////////////////////////////////////////////////////////////////////
+  // add requesters
+  addRequesters: function(room){
+
+  },
+
+  //////////////////////////////////////////////////////////////////////////////
+  // add givers
+  addGivers: function(room){
+    var roomName = room.name;
+
+    // initialize room
+    if (Memory.givers[roomName] === undefined) Memory.givers[roomName] = {dropped: {}, miningContainers: {}};
+
+    // all the dropped resources
+    var drops = room.find(FIND_DROPPED_RESOURCES, {filter: (r => r.resourceType == RESOURCE_ENERGY)});
+    for (var i in drops){
+      var drop = drops[i];
+      var id = drop.id;
+
+      // if this drop isn't registered yet, get it
+      if (Memory.givers[roomName].dropped[id] === undefined && drop.resourceType === RESOURCE_ENERGY){
+        Memory.givers[roomName].dropped[id] = {amount: drop.amount};
+      }
+    }
+
+    // all the containers
+    for (var id in Memory.containers[roomName]){
+      var purpose = Memory.containers[roomName][id].job;
+      var container = Game.getObjectById(id);
+
+      // see what it's meant for
+      switch (purpose) {
+        case "mining":
+          // if this mine is not registered yet, get it
+          if (Memory.givers[roomName].miningContainers[id] === undefined){
+            Memory.givers[roomName].miningContainers[id] = {amount: container.store!==undefined?container.store.getUsedCapacity(RESOURCE_ENERGY):0};
+          }
+          break;
+
+        case "upgrading":
+          // if this upgrader is not registered yet, get it
+          if (Memory.givers[roomName].upgradingContainer[id] === undefined){
+            Memory.givers[roomName].upgradingContainer[id] = {amount: container.store.getUsedCapacity(RESOURCE_ENERGY)};
+          }
+          break;
+      }
+    }
+  },
+
+  //////////////////////////////////////////////////////////////////////////////
+  // reorganize requesters
+  reorganizeRequesters: function(room){
+    var roomName = room.name;
+
+    if (Memory.requesters[roomName] === undefined) Memory.requesters[roomName] = {};
+  },
+
+  //////////////////////////////////////////////////////////////////////////////
+  // reorganize givers
+  reorganizeGivers: function(room){
+    var roomName = room.name;
+
+    if (Memory.givers[roomName] === undefined) Memory.givers[roomName] = {dropped: {}, miningContainers: {}};
+
+    // check the ones we have
+    for (var type in Memory.givers[roomName]){
+      for (var id in Memory.givers[roomName][type]){
+        var obj = Game.getObjectById(id);
+
+        // not a giver anymore
+        if (!obj){
+          Memory.givers[roomName][type][id] = undefined; // delete it
+        }
+
+        // else, resets its actual enegy (creeps will later change that this tick)
+        else {
+          Memory.givers[roomName][type][id].amount = obj.store!==undefined?obj.store.getUsedCapacity():(obj.amount!==undefined?obj.amount:0);
+        }
+      }
+    }
+  },
+
+  //////////////////////////////////////////////////////////////////////////////
   // reorganize broken
   reorganizeBroken: function(room){
     var broken = funcStruct.getBroken(room);
@@ -15,8 +98,10 @@ var manageLists = {
       if (!obj || funcStruct.checkRepaired(obj)){
         // delete all posts
         for (var i in Memory.broken[room.name][id].workers){
-          Game.creeps[i].memory.post = null;
+          if (Game.creeps[i]){
+            Game.creeps[i].memory.post = null;
             Game.creeps[i].memory.postRoom = null;
+          }
         }
 
         // delete task
@@ -45,19 +130,35 @@ var manageLists = {
 
     // check for old ones done
     for (var id in Memory.constructing[room.name]){
-      var site = !Game.getObjectById(id);
+      var site = Game.getObjectById(id);
 
+      // the site is dead, or done
       if (!site || !site.progress){
 
         // delete posts
         for (var name in Memory.constructing[room.name][id].workers){
-          Game.creeps[name].memory.post = null;
-          Game.creeps[name].memory.postRoom = null;
+          if (Game.creeps[i]){
+            Game.creeps[i].memory.post = null;
+            Game.creeps[i].memory.postRoom = null;
+          }
         }
 
         // delete from list
         delete Memory.constructing[room.name][id];
       }
+
+
+      else{
+        // check if one of the creeps is dead
+        for (var i in Memory.constructing[room.name][id].workers){
+          var creep = Game.creeps[i];
+
+          if (!creep || creep.memory.post !== id){
+            Memory.constructing[room.name][id].workers[i] = undefined;
+          }
+        }
+      }
+
     }
 
     // add new ones
@@ -106,6 +207,8 @@ var manageLists = {
         }
 
         if (!Game.getObjectById(info.container)){
+          if (Memory.containers[i] === undefined) Memory.containers[i] = {};
+
           // if the container is still building
           if (info.container === "building"){
             // bug safe
@@ -121,13 +224,13 @@ var manageLists = {
             var contObj = room.lookForAt(LOOK_CONSTRUCTION_SITES,info.containerPos.x, info.containerPos.y)[0];
             if (_.get(contObj, 'structureType') === STRUCTURE_CONTAINER) {
               info.container = contObj.id;
-              Memory.containers[contObj.id] = {job: "mining", source: j};
+              Memory.containers[i][contObj.id] = {job: "mining", source: j};
               console.log("Container was detected and saved");
             }
 
           // if the container does not exist
           } else if (!Game.getObjectById(info.container)) {
-            delete Memory.containers[info.container]; // delete it from the other list
+            delete Memory.containers[i][info.container]; // delete it from the other list
             info.container = null; // reset container
             console.log("Source is missing a container.");
           }
@@ -153,6 +256,12 @@ var manageLists = {
 
       // will see all the constructions
       Memory.constructing = {};
+
+      // will see all requesters
+      Memory.givers = {};
+
+      // will see all givers
+      Memory.requesters = {};
 
       // will keep track of how much creeps we wanna have
       Memory.spawnOrder = [
@@ -183,6 +292,23 @@ var manageLists = {
 
     for (var i in Memory.reservedRooms){
       var room = Game.rooms[i];
+
+      // timed ticks
+      switch (Game.time%5) {
+        case 0:
+          this.addGivers(room);
+          break;
+
+        case 1:
+          this.addRequesters(room);
+          break;
+      }
+
+      // reorganize givers
+      this.reorganizeGivers(room);
+
+      // reorganize requesters
+      this.reorganizeRequesters(room);
 
       // reorganize broken things
       this.reorganizeBroken(room);

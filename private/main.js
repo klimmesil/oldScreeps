@@ -29,9 +29,17 @@ const debugging = {
   buildings: 1
 };
 
+const workPriorities = {
+  harvester: 0,
+  hauler: 1,
+  miner: 2,
+  upgrader: 3,
+  builder: 4
+};
+
 // main paragraph
 module.exports.loop = function() {
-    
+
   // new tick
   console.log("________" + Game.time + "______________________________________________");
 
@@ -45,11 +53,23 @@ module.exports.loop = function() {
   // debug
   funcDebug.markAll(debugging);
 
-  // apply jobs
-  for (var name in Game.creeps){
-    var creep = Game.creeps[name];
-    var job = creep.memory.job;
+  // make a work order
+  var workOrder = [[],[],[],[],[]];
 
-    if (job !== undefined) jobObjects[job].run(creep, debugging[job]);
+  for (var name in Game.creeps){
+    var job = Memory.creeps[name].job;
+
+    workOrder[workPriorities[job]].push(name);
+  }
+
+  // apply jobs
+  for (var i in workOrder){
+    for (var j in workOrder[i]){
+      var name = workOrder[i][j];
+      var creep = Game.creeps[name];
+      var job = creep.memory.job;
+
+      if (job !== undefined) jobObjects[job].run(creep, debugging[job]);
+    }
   }
 }

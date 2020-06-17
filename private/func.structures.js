@@ -2,35 +2,67 @@ var funcStruct = {
   //////////////////////////////////////////////////////////////////////////////////////////////////////////
   // tells if the structure is watched by a miner
   watched: function (structure){
-    return (structure.structureType == STRUCTURE_CONTAINER && Memory.containers[structure.id].job == "mining" && Game.creeps[Memory.sources[structure.room.name][Memory.containers[structure.id].source].miner]);
+    return (structure.structureType == STRUCTURE_CONTAINER && Memory.containers[structure.room.name][structure.id].job == "mining" && Game.creeps[Memory.sources[structure.room.name][Memory.containers[structure.room.name][structure.id].source].miner]);
   },
 
   //////////////////////////////////////////////////////////////////////////////////////////////////////////
-  // gives all the default givers (resource, mining containers)
-  // opt = {type: res, minVal: int}
-  getGivers: function(room, opt){
-    // all the dropped resources
-    var type = (opt.type?opt.type:RESOURCE_ENERGY);
-    var minVal = (opt.min?opt.min:50);
-    var requesters = room.find(FIND_DROPPED_RESOURCES, {filter: (r => r.resourceType == type && r.amount >= minVal)});
+  // reduced the theorical amount by x
+  reduceAmount: function(struct, x){
+    var id = struct.id;
+    var type = struct.structureType !== undefined?struct.structureType:"dropped";
+    var roomName = struct.room.name;
 
-    // all the sources
-    if (type == RESOURCE_ENERGY){
-      miningSites = Memory.sources[room.name];
+    // find where it is stored
+    var purpose = "";
+    switch (type) {
+      case "dropped":
+        purpose = "dropped";
+        break;
 
-      // for each mining site
-      for (var i in miningSites){
-        var info = miningSites[i];
-        var container = Game.getObjectById(info.container);
-
-        // if there is a container BUILT
-        if (container && container.store && container.store.getUsedCapacity(RESOURCE_ENERGY) >= minVal){
-          requesters.push(container);
+      case STRUCTURE_CONTAINER:
+        if (Memory.containers[roomName][id].job == "mining"){
+          purpose = "miningContainer";
         }
-      }
+        break;
     }
 
-    return requesters;
+    // reduce the amount
+    var amount = Memory.givers[roomName][purpose][id].amount;
+    Memory.givers[roomName][purpose][id].amount = amount - x;
+  },
+
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////
+  // gives all the givers (resource, mining containers)
+  // opt = {minVal: int, order: []}
+  getGivers: function(room, opt){
+    var minVal = opt.minVal;
+    var order = opt.order;
+    var givers = [];
+
+    // respect order
+    for (var num in order){
+      // we get all the targets
+      var targets = [];
+      for (var j in order[num]){
+        var type = order[num][j];
+
+        // array of acceptable givers of type type.
+        var acceptable = [];
+        for (var id in Memory.givers[room.name][type]){
+          if (Memory.givers[room.name][type][id].amount >= minVal){
+            acceptable.push(Game.getObjectById(id));
+          }
+        }
+        targets = targets.concat(acceptable);
+      }
+
+
+      // if we have one target, send it!
+      if (targets.length > 0) return targets;
+    }
+
+    // no targets found
+    return [];
   },
 
   //////////////////////////////////////////////////////////////////////////////////////////////////////////

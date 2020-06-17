@@ -53,3 +53,10 @@ JSON.stringify(structure);
 "id":"5bbcaf789099fc012e63aa49",
 "energy":3000,
 "energyCapacity":3000}
+
+
+
+// TODO
+// givers
+// upgrader
+// autou spawning (with and without failSafe)
