@@ -58,5 +58,4 @@ JSON.stringify(structure);
 
 // TODO
 // givers
-// upgrader
-// autou spawning (with and without failSafe)
+// auto spawning (with and without failSafe)

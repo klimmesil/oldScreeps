@@ -1,3 +1,34 @@
+var funcCreeps = require("func.creeps");
+var funcStruct = require("func.structures");
+
+const models = {
+  // example:
+  // jobName : [Necessary array, bonus array] bonus array will be repeated as many times as possible, going from left to right
+  builder: [ [],
+  [MOVE,MOVE,CARRY,WORK,WORK,WORK]],
+
+  upgrader: [ [MOVE, CARRY],
+  [WORK]],
+
+  hauler: [ [],
+  [MOVE, CARRY, CARRY]],
+
+  miner: [ [MOVE, CARRY],
+  [WORK]]
+}
+
+const spawnOrder = [
+  // tolerance sees how strong you want your creep to be
+  // maxed: max it
+  // capped: max it, with a cap.
+  {job: "miner", need: "number", number: 1, tolerance: "capped", cap: 800},
+  {job: "hauler", need: "number", number: 1, tolerance: "maxed"},
+  {job: "upgrader", need: "number", number: 1, tolerance: "maxed"},
+  {job: "builder", need: "number", number : 1, tolerance: "maxed"},
+
+  {job: "miner", need: "sourceFill", tolerance: "capped", cap: 800}
+]
+
 var manageCrew = {
   //////////////////////////////////////////////////////////////////////////////////////////////////////////
   // try to save the colony
@@ -163,9 +194,86 @@ var manageCrew = {
   },
 
   //////////////////////////////////////////////////////////////////////////////////////////////////////////
+  // manages bodyStrength
+  makeBody: function(model, energy) {
+    // see body const to see which model is used
+    var remainingEnergy = energy;
+    var info = models[model];
+
+    // we make the initial body
+    var body = [...info[0]]; // initial body, necessary parts
+    var initialCost = funcCreeps.bodyCost(body);
+    remainingEnergy -= initialCost;
+    if (remainingEnergy < 0) return []; // the body is too expensive
+
+    // we add the bonus parts
+    var bonus = [...info[1]]; // bonus parts if possible.
+    var bonusCost = funcCreeps.bodyCost(bonus);
+    var num = Math.floor(remainingEnergy / bonusCost);
+
+    // we add whole bonus parts
+    for (var i = 1; i <= num; i++){
+      body = body.concat(bonus);
+    }
+
+    remainingEnergy -= num * bonusCost;
+
+
+    // we fill with the rest if possible
+    var k = 0;
+    var modulo = bonus.length;
+    while (true){
+      var addedPart = bonus[k];
+      var addedCost = BODYPART_COST[addedPart];
+
+      // we can add the part
+      if (remainingEnergy >= addedCost){
+        remainingEnergy -= addedCost;
+        body.push(addedPart);
+      }
+
+      // the part is too expensive
+      else {
+        break;
+      }
+
+      k = (k+1)%modulo;
+    }
+
+    return body;
+  },
+
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////
+  // gets living creeps (with job and remaining ticks to live)
+  getLiving: function(job, ticks){
+    var ret = [];
+
+    // look all of the creeps
+    for (var i in Game.creeps){
+      var creep = Game.creeps[i];
+
+      if (creep.ticksToLive >= ticks && creep.memory.job == job){
+        ret.push(creep);
+      }
+    }
+
+    return ret;
+  },
+
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////
+  // sees if there is a source that isn't working at full speed
+  potentialSource: function(room){
+    for (var i in Memory.sources[room.name]){
+      if (funcStruct.fullPotential(i)) return true;
+    }
+
+    return false;
+  },
+
+
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////
   // manages respawning
   respawn : function(spawn){
-    var spawnOrder = Memory.spawnOrder;
     // if we are spawning, announce
     if (spawn.spawning){
       var newName = spawn.spawning.name;
@@ -174,29 +282,66 @@ var manageCrew = {
         spawn.pos.x+5,
         spawn.pos.y);
       console.log("Spawning " + newName + " !");
-
-    // else go look into the list
-    } else {
-      for (var i in spawnOrder){
-        // vars
-        var jobName = spawnOrder[i].job;
-        var alive = 0;
+      return true;
+    }
 
 
-        // count the number already alive
-        for (var j in Game.creeps){
-          if (Game.creeps[j].memory.job == jobName) alive += 1;
-        }
-        var number = spawnOrder[i].number;
 
-        // if it's not enough, just pop one out
-        if (number > alive){
-          var body = spawnOrder[i].body;
-          var newName = jobName + Game.time;
-          console.log("Spawning " + newName + " !" + spawn.spawnCreep(body, newName, {memory: {job: jobName}}));
+    // else go look for something to spawn
+    for (var i in spawnOrder){
+      var job = spawnOrder[i].job
+
+      console.log("We are now spawning things", i, spawnOrder[i].need, this.potentialSource(spawn.room.name));
+
+      ///// YOU WERE HERE /////// problem is potentialSource not working
+
+      // we want a specific number of these living
+      if (spawnOrder[i].need === "number"){
+        var living = this.getLiving(job, 100); // all the creeps with the job and 100+ ticks to live
+
+        if (spawnOrder[i].number > living.length){
+          // see how much energy we need
+          var energy = 0;
+          if (spawnOrder[i].tolerance === "capped"){
+            energy = Math.min(spawn.room.energyCapacityAvailable, spawnOrder[i].cap);
+          }
+
+          else if (spawnOrder[i].tolerance === "maxed") {
+            energy = spawn.room.energyCapacityAvailable;
+          }
+
+          // make the body
+          var body = makeBody(job, energy);
+
+          // name and spawn him
+          var newName = job + Game.time;
+          console.log("Spawning " + newName + " !" + spawn.spawnCreep(body, newName, {memory: {job: job}}));
           break;
         }
+
       }
+
+      // we want them to occupy the sources as much as possible (see miners)
+      else if (spawnOrder[i].need === "sourceFill" && this.potentialSource(spawn.room.name)){
+        // see how much energy we need
+        var energy = 0;
+        if (spawnOrder[i].tolerance === "capped"){
+          energy = Math.min(spawn.room.energyCapacityAvailable, spawnOrder[i].cap);
+        }
+
+        else if (spawnOrder[i].tolerance === "maxed") {
+          energy = spawn.room.energyCapacityAvailable;
+        }
+
+        // make the body
+        var body = makeBody(job, energy);
+
+        // name and spawn him
+        var newName = job + Game.time;
+        console.log("Spawning " + newName + " !" + spawn.spawnCreep(body, newName, {memory: {job: job}}));
+        break;
+      }
+
     }
   }
 };

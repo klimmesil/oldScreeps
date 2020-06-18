@@ -168,10 +168,12 @@ var funcCreeps = {
     var postObj = Game.getObjectById(post);
     var dist = creep.pos.getRangeTo(postObj);
     if (dist > minDist){
-      if (debug == 1) creep.say("🏍️");
       creep.moveTo(postObj, {visualizePathStyle: {}});
-      return true;
     }
+
+    dist = dist-1;
+
+    if (dist > minDist) return true;
     return false;
 
   },

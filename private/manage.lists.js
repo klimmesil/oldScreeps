@@ -74,7 +74,7 @@ var manageLists = {
 
         // not a giver anymore
         if (!obj){
-          Memory.givers[roomName][type][id] = undefined; // delete it
+          delete Memory.givers[roomName][type][id]; // delete it
         }
 
         // else, resets its actual enegy (creeps will later change that this tick)
@@ -154,7 +154,7 @@ var manageLists = {
           var creep = Game.creeps[i];
 
           if (!creep || creep.memory.post !== id){
-            Memory.constructing[room.name][id].workers[i] = undefined;
+            delete Memory.constructing[room.name][id].workers[i];
           }
         }
       }

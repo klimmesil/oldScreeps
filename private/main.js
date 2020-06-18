@@ -23,7 +23,7 @@ const debugging = {
   hauler: 0,
   miner: 0,
   upgrader: 1,
-  builder: 1,
+  builder: 0,
   damaged: 1,
   sources: 1,
   buildings: 1
@@ -49,6 +49,7 @@ module.exports.loop = function() {
   manageCrew.respawn(Game.spawns["Spawn1"]);
   manageLists.reorganize();
   manageBuilds.restructure();
+
 
   // debug
   funcDebug.markAll(debugging);

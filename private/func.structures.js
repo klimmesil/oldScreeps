@@ -6,6 +6,46 @@ var funcStruct = {
   },
 
   //////////////////////////////////////////////////////////////////////////////////////////////////////////
+  // tells if the source is at full potential (W>=7)
+  fullPotential: function(id){
+    var source = Game.getObjectById(id);
+
+    if (!source) return null;
+
+    var roomName = source.room.name;
+    var w = 0;
+
+    // count miner's works
+    var miner = Game.creeps[Memory.sources[roomName][id].miner];
+
+    if (!miner) return false;
+
+    var body = miner.body;
+    for (var i in body){
+      if(body[i] === WORK) w += 1;
+    }
+
+    // count extras
+    var extras = Memory.sources[roomName][id].extras;
+    if (extras === undefined){
+      Memory.sources[roomName][id].extras = {};
+    }
+
+    else {
+      for (var i in extras){
+        var creep = Game.creeps[extras[i]];
+        body = creep.body;
+        for (var i in body){
+          if(body[i] === WORK) w += 1;
+        }
+      }
+    }
+
+    // return if it is at full potential
+    return (w >= 7);
+  },
+
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////
   // reduced the theorical amount by x
   reduceAmount: function(struct, x){
     var id = struct.id;

@@ -1,12 +1,16 @@
 var funcCreeps = require("func.creeps");
 
+const order = [
+  ["miningContainer", "dropped"]
+]
+
 var jobHauler = {
   run : function(creep, debug){
     // say job
     if (debug == 2) creep.say("🏎️");
 
     // go refill no force
-    if (funcCreeps.refill(creep, {})){
+    if (funcCreeps.refill(creep, {order: [...order]})){
       if (debug == 1) creep.say("⚡");
     }
 
@@ -16,7 +20,7 @@ var jobHauler = {
     }
 
     // go refill, force
-    else if (funcCreeps.refill(creep, {force:true})){
+    else if (funcCreeps.refill(creep, {force:true, order: [...order]})){
       if (debug == 1) creep.say("⚡");
     }
 
