@@ -72,19 +72,67 @@ var funcCreeps = {
   },
 
   //////////////////////////////////////////////////////////////////////////////////////////////////////////
+  // take a mining post. of course, first fill all sources, then optimize it.
+  // opt = {}
+  getMiningPost: function(creep, opt){
+    for (var roomName in Memory.sources){
+      for (var i in Memory.sources[roomName]){
+        var info = Memory.sources[roomName][i];
+        var miner = info.miner;
+
+        // become a miner
+        if (!Game.creeps[miner]){
+          info.miner = creep.name;
+
+          // delete old helping if necessary;
+          if (creep.memory.helping){
+            delete Memory.sources[creep.memory.postRoom][creep.memory.helping].extras[creep.name];
+            creep.memory.helping = null;
+          }
+
+          creep.memory.post = i;
+          creep.memory.postRoom = roomName;
+
+          info.miner = creep.name;
+          console.log("miner", creep.name, "now works at source", i);
+          return true;
+        }
+
+        // become a helper
+        if (!funcStruct.fullPotential(i, roomName) && !creep.memory.helping){
+          creep.memory.helping = i;
+          creep.memory.postRoom = roomName;
+          creep.memory.post = null;
+          info.extras[creep.name] = true;
+          console.log("miner", creep.name, "now helps at source", i);
+          return true;
+        }
+      }
+    }
+  },
+
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////
   // mines. Only possible if source is visible!
   // opt = {source: sourceObj (by default, it's the miner's source)}
   mine: function(creep, opt){
-    // default vars
-    var source = opt.source !== undefined?opt.source:(Game.getObjectById(creep.memory.post));
+    // just usual...
+    var source = opt.source?Game.getObjectById(opt.source):null;
+
+    // if there is no source, look for the default one
+    if (!source){
+      if (creep.memory.post) source = Game.getObjectById(creep.memory.post);
+      else if (creep.memory.helping) source = Game.getObjectById(creep.memory.helping);
+      else return false;
+    }
+
+    if (!source) return false;
+
+    // now go mine
     var dist = creep.pos.getRangeTo(source);
+    if (dist > 1) creep.moveTo(source, {visualizePathStyle: {}});
+    if (dist <= 1) creep.harvest(source);
 
-    // mine
-    if (dist > 1) creep.moveTo(source, {visualizePathStyle: {}}); // get closer
-    else creep.harvest(source); // harvest
-
-    return true
-
+    return true;
   },
 
   //////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -167,14 +215,15 @@ var funcCreeps = {
     // check if we are already at post
     var postObj = Game.getObjectById(post);
     var dist = creep.pos.getRangeTo(postObj);
+
     if (dist > minDist){
       creep.moveTo(postObj, {visualizePathStyle: {}});
     }
+    else {
+      return false;
+    }
 
-    dist = dist-1;
-
-    if (dist > minDist) return true;
-    return false;
+    return true;
 
   },
 
@@ -186,13 +235,13 @@ var funcCreeps = {
     var post = Game.getObjectById(postID);
 
     // failSafe: repair job, not forced and requirements
-    if (post && !post.progress && !forced && Object.keys(Memory.broken[creep.room.name][postID].workers).length > Memory.broken[creep.room.name][postID].number){
+    if (post && post.progress === undefined && !forced && Object.keys(Memory.broken[creep.room.name][postID].workers).length > Memory.broken[creep.room.name][postID].number){
       Memory.broken[creep.room.name][postID].workers[creep.name] = undefined; // delete from list
       creep.memory.post = undefined; // delete from memory
     }
 
     // no job
-    if (!post || post.progress){
+    if (!post || post.progress !== undefined){
       // vars
       var forced = opt.forced;
       var n = 1;
@@ -235,7 +284,7 @@ var funcCreeps = {
     }
 
 
-    if (!post || post.progress) return false; // no job found
+    if (!post || post.progress !== undefined) return false; // no job found
 
 
     // else, job and work!

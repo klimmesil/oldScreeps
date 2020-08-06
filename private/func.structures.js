@@ -7,12 +7,11 @@ var funcStruct = {
 
   //////////////////////////////////////////////////////////////////////////////////////////////////////////
   // tells if the source is at full potential (W>=7)
-  fullPotential: function(id){
+  fullPotential: function(id, roomName){
     var source = Game.getObjectById(id);
 
     if (!source) return null;
 
-    var roomName = source.room.name;
     var w = 0;
 
     // count miner's works
@@ -22,7 +21,7 @@ var funcStruct = {
 
     var body = miner.body;
     for (var i in body){
-      if(body[i] === WORK) w += 1;
+      if(body[i].type === WORK) w += 1;
     }
 
     // count extras
@@ -33,10 +32,10 @@ var funcStruct = {
 
     else {
       for (var i in extras){
-        var creep = Game.creeps[extras[i]];
+        var creep = Game.creeps[i];
         body = creep.body;
         for (var i in body){
-          if(body[i] === WORK) w += 1;
+          if(body[i].type === WORK) w += 1;
         }
       }
     }

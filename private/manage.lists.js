@@ -191,20 +191,6 @@ var manageLists = {
       // just a quick check for each source
       for (var j in Memory.sources[i]){
         var info = Memory.sources[i][j];
-        // miner will automaticly uncheck if necessary
-
-        // look for an employee
-        if (!info.miner){
-          var vacantMiners = room.find(FIND_MY_CREEPS, {filter: c => (c.memory.job == "miner" && c.memory.post == null)});
-
-          if (vacantMiners.length > 0){
-            var chosen = vacantMiners[0];
-            info.miner = chosen.name;
-            chosen.memory.post = j;
-            chosen.memory.postRoom = i;
-            console.log("Miner", chosen.name,"now works at source.");
-          }
-        }
 
         if (!Game.getObjectById(info.container)){
           if (Memory.containers[i] === undefined) Memory.containers[i] = {};

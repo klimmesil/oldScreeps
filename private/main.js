@@ -22,8 +22,8 @@ const debugging = {
   harvester: 0,
   hauler: 0,
   miner: 0,
-  upgrader: 1,
-  builder: 0,
+  upgrader: 0,
+  builder: 1,
   damaged: 1,
   sources: 1,
   buildings: 1

@@ -11,7 +11,7 @@ const models = {
   [WORK]],
 
   hauler: [ [],
-  [MOVE, CARRY, CARRY]],
+  [MOVE, CARRY]],
 
   miner: [ [MOVE, CARRY],
   [WORK]]
@@ -22,11 +22,10 @@ const spawnOrder = [
   // maxed: max it
   // capped: max it, with a cap.
   {job: "miner", need: "number", number: 1, tolerance: "capped", cap: 800},
+    {job: "miner", need: "sourceFill", tolerance: "capped", cap: 800},
   {job: "hauler", need: "number", number: 1, tolerance: "maxed"},
   {job: "upgrader", need: "number", number: 1, tolerance: "maxed"},
-  {job: "builder", need: "number", number : 1, tolerance: "maxed"},
-
-  {job: "miner", need: "sourceFill", tolerance: "capped", cap: 800}
+  {job: "builder", need: "number", number : 1, tolerance: "maxed"}
 ]
 
 var manageCrew = {
@@ -35,10 +34,10 @@ var manageCrew = {
   failSafe: function(){
     if (Memory.failSafe !== undefined){
       var spawn = Game.spawns[Memory.failSafe.spawnName];
-      var trySpawn = spawn.spawnCreep(Memory.failSafe.body, "finalHauler",  {memory: {job: "miner"}});
+      var trySpawn = spawn.spawnCreep(Memory.failSafe.body, "finalHauler",  {memory: {job: "hauler"}});
       console.log("high failSafe hauler incomming " + trySpawn);
       if (trySpawn == 0){
-        delete Memory.failSafe;
+        Memory.failSafe = "DONE";
       }
     }
 
@@ -264,7 +263,7 @@ var manageCrew = {
   // sees if there is a source that isn't working at full speed
   potentialSource: function(room){
     for (var i in Memory.sources[room.name]){
-      if (funcStruct.fullPotential(i)) return true;
+      if (!funcStruct.fullPotential(i, room.name)) return true;
     }
 
     return false;
@@ -274,6 +273,12 @@ var manageCrew = {
   //////////////////////////////////////////////////////////////////////////////////////////////////////////
   // manages respawning
   respawn : function(spawn){
+    // don't try to f things up
+    if (Memory.failSafe !== undefined){
+      if (Memory.failSafe === "DONE") delete Memory.failSafe;
+      return false;
+    }
+
     // if we are spawning, announce
     if (spawn.spawning){
       var newName = spawn.spawning.name;
@@ -291,10 +296,6 @@ var manageCrew = {
     for (var i in spawnOrder){
       var job = spawnOrder[i].job
 
-      console.log("We are now spawning things", i, spawnOrder[i].need, this.potentialSource(spawn.room.name));
-
-      ///// YOU WERE HERE /////// problem is potentialSource not working
-
       // we want a specific number of these living
       if (spawnOrder[i].need === "number"){
         var living = this.getLiving(job, 100); // all the creeps with the job and 100+ ticks to live
@@ -311,18 +312,18 @@ var manageCrew = {
           }
 
           // make the body
-          var body = makeBody(job, energy);
+          var body = this.makeBody(job, energy);
 
           // name and spawn him
           var newName = job + Game.time;
-          console.log("Spawning " + newName + " !" + spawn.spawnCreep(body, newName, {memory: {job: job}}));
+          console.log("Started spawning " + newName + " !" + spawn.spawnCreep(body, newName, {memory: {job: job}}));
           break;
         }
 
       }
 
       // we want them to occupy the sources as much as possible (see miners)
-      else if (spawnOrder[i].need === "sourceFill" && this.potentialSource(spawn.room.name)){
+      else if (spawnOrder[i].need === "sourceFill" && this.potentialSource(spawn.room)){
         // see how much energy we need
         var energy = 0;
         if (spawnOrder[i].tolerance === "capped"){
@@ -334,11 +335,11 @@ var manageCrew = {
         }
 
         // make the body
-        var body = makeBody(job, energy);
+        var body = this.makeBody(job, energy);
 
         // name and spawn him
         var newName = job + Game.time;
-        console.log("Spawning " + newName + " !" + spawn.spawnCreep(body, newName, {memory: {job: job}}));
+        console.log("Started spawning " + newName + " !" + spawn.spawnCreep(body, newName, {memory: {job: job}}));
         break;
       }
 
