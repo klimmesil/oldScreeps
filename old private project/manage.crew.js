@@ -11,7 +11,7 @@ const models = {
   [WORK]],
 
   hauler: [ [],
-  [MOVE, CARRY]],
+  [CARRY, MOVE]],
 
   miner: [ [MOVE, CARRY],
   [WORK]]
@@ -22,10 +22,13 @@ const spawnOrder = [
   // maxed: max it
   // capped: max it, with a cap.
   {job: "miner", need: "number", number: 1, tolerance: "capped", cap: 800},
-    {job: "miner", need: "sourceFill", tolerance: "capped", cap: 800},
+  {job: "hauler", need: "basicHauling", max: 5, tolerance: "maxed"},
+  {job: "miner", need: "spawnSourceFill", max: 5, tolerance: "capped", cap: 800},
   {job: "hauler", need: "number", number: 1, tolerance: "maxed"},
   {job: "upgrader", need: "number", number: 1, tolerance: "maxed"},
-  {job: "builder", need: "number", number : 1, tolerance: "maxed"}
+  {job: "builder", need: "number", number : 2, tolerance: "maxed"},
+  {job: "upgrader", need: "number", number: 2, tolerance: "maxed"},
+  {job: "builder", need: "number", number : 3, tolerance: "maxed"}
 ]
 
 var manageCrew = {
@@ -157,11 +160,20 @@ var manageCrew = {
         var announceDeath = "☠️ RIP " + name
 
         // if he had a post, delete it
-        if (Memory.creeps[name].post){
+        if (Memory.creeps[name].post || Memory.creeps[name].helping){
           // delete from mines
           if (Memory.creeps[name].job == "miner"){
-            Memory.sources[Memory.creeps[name].postRoom][Memory.creeps[name].post].miner = null;
-            announceDeath += "... Unchecked his mining";
+            // this one was mining
+            if (Memory.creeps[name].post){
+              Memory.sources[Memory.creeps[name].postRoom][Memory.creeps[name].post].miner = null;
+              announceDeath += "... Unchecked his mining";
+            }
+
+            // this one was helping
+            else if (Memory.creeps[name].helping){
+              Memory.sources[Memory.creeps[name].postRoom][Memory.creeps[name].helping].extras[name] = undefined;
+              announceDeath += "... Unchecked his helping";
+            }
           }
 
           // builder...
@@ -263,12 +275,62 @@ var manageCrew = {
   // sees if there is a source that isn't working at full speed
   potentialSource: function(room){
     for (var i in Memory.sources[room.name]){
-      if (!funcStruct.fullPotential(i, room.name)) return true;
+      if (funcStruct.minePower(i, room.name)<5) return true;
     }
 
     return false;
   },
 
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////
+  // sees if we are lacking haulpower
+  lackHauling: function(room){
+    // vars
+    var h = funcStruct.haulPower(room.name);
+    var w = 0;
+
+    // mine power
+    for (var i in Memory.sources[room.name]){
+      w += Math.min(funcStruct.minePower(i, room.name), 5); // add 5 (fully mined) or actual power
+    }
+
+    // now, we think about it, expecting a walking distance of 10 for each haul (it is way more for real).
+    var energyMined = 20*w; // mined in X ticks
+    var energyHauled = h*50; // hauled in X ticks
+
+
+    console.log("look:" + energyMined + "/" + energyHauled);
+    return energyMined > energyHauled;
+  },
+
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////
+  // sees how much energy you can use
+  allowedEnergy: function(spawn, tolerance, cap){
+
+    // see how much energy we can use
+    if (tolerance === "capped"){
+      return Math.min(spawn.room.energyCapacityAvailable, cap);
+    }
+
+    else if (tolerance === "maxed") {
+      return spawn.room.energyCapacityAvailable;
+    }
+
+
+
+
+  },
+
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////
+  // spawns a creep
+  spawnCreep: function(spawn, job, energy){
+    // make the body
+    var body = this.makeBody(job, energy);
+
+    // name and spawn him
+    var newName = job + Game.time;
+
+    console.log("Started spawning " + newName + " !" + spawn.spawnCreep(body, newName, {memory: {job: job}}));
+  },
 
   //////////////////////////////////////////////////////////////////////////////////////////////////////////
   // manages respawning
@@ -300,46 +362,28 @@ var manageCrew = {
       if (spawnOrder[i].need === "number"){
         var living = this.getLiving(job, 100); // all the creeps with the job and 100+ ticks to live
 
+        //ok spawn it!
         if (spawnOrder[i].number > living.length){
-          // see how much energy we need
-          var energy = 0;
-          if (spawnOrder[i].tolerance === "capped"){
-            energy = Math.min(spawn.room.energyCapacityAvailable, spawnOrder[i].cap);
-          }
-
-          else if (spawnOrder[i].tolerance === "maxed") {
-            energy = spawn.room.energyCapacityAvailable;
-          }
-
-          // make the body
-          var body = this.makeBody(job, energy);
-
-          // name and spawn him
-          var newName = job + Game.time;
-          console.log("Started spawning " + newName + " !" + spawn.spawnCreep(body, newName, {memory: {job: job}}));
+          var energy = this.allowedEnergy(spawn, spawnOrder[i].tolerance, spawnOrder[i].cap);
+          this.spawnCreep(spawn, job, energy);
           break;
         }
 
       }
 
-      // we want them to occupy the sources as much as possible (see miners)
-      else if (spawnOrder[i].need === "sourceFill" && this.potentialSource(spawn.room)){
+      // we want them to be able to at least haul the miners' resources
+      else if (spawnOrder[i].need === "basicHauling" && this.lackHauling(spawn.room)){
         // see how much energy we need
-        var energy = 0;
-        if (spawnOrder[i].tolerance === "capped"){
-          energy = Math.min(spawn.room.energyCapacityAvailable, spawnOrder[i].cap);
-        }
+        var energy = this.allowedEnergy(spawn, spawnOrder[i].tolerance, spawnOrder[i].cap);
+        this.spawnCreep(spawn, job, energy);
+        break;
+      }
 
-        else if (spawnOrder[i].tolerance === "maxed") {
-          energy = spawn.room.energyCapacityAvailable;
-        }
-
-        // make the body
-        var body = this.makeBody(job, energy);
-
-        // name and spawn him
-        var newName = job + Game.time;
-        console.log("Started spawning " + newName + " !" + spawn.spawnCreep(body, newName, {memory: {job: job}}));
+      // we want them to occupy the sources as much as possible (see miners)
+      else if (spawnOrder[i].need === "spawnSourceFill" && this.potentialSource(spawn.room)){
+        // see how much energy we need
+        var energy = this.allowedEnergy(spawn, spawnOrder[i].tolerance, spawnOrder[i].cap);
+        this.spawnCreep(spawn, job, energy);
         break;
       }
 

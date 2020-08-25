@@ -1,13 +1,7 @@
 var funcStruct = {
   //////////////////////////////////////////////////////////////////////////////////////////////////////////
-  // tells if the structure is watched by a miner
-  watched: function (structure){
-    return (structure.structureType == STRUCTURE_CONTAINER && Memory.containers[structure.room.name][structure.id].job == "mining" && Game.creeps[Memory.sources[structure.room.name][Memory.containers[structure.room.name][structure.id].source].miner]);
-  },
-
-  //////////////////////////////////////////////////////////////////////////////////////////////////////////
-  // tells if the source is at full potential (W>=7)
-  fullPotential: function(id, roomName){
+  // tells the mine power
+  minePower: function(id, roomName){
     var source = Game.getObjectById(id);
 
     if (!source) return null;
@@ -33,6 +27,12 @@ var funcStruct = {
     else {
       for (var i in extras){
         var creep = Game.creeps[i];
+
+        if (!creep){
+          Memory.sources[roomName][id].extras[i] = undefined;
+          break;
+        }
+
         body = creep.body;
         for (var i in body){
           if(body[i].type === WORK) w += 1;
@@ -41,7 +41,30 @@ var funcStruct = {
     }
 
     // return if it is at full potential
-    return (w >= 7);
+    return w;
+  },
+
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////
+  // tells the haul power
+  haulPower: function(roomName){
+    // vars
+    var room = Game.rooms[roomName];
+    var haulers = room.find(FIND_MY_CREEPS, {filter: (c)=>(c.memory.job === "hauler")});
+    var h = 0;
+
+    // counting each hauler's power
+    for (var i in haulers){
+      var hauler = haulers[i];
+
+
+      for (var j in hauler.body){
+        if (hauler.body[j].type === CARRY){
+          h += 1;
+        }
+      }
+    }
+
+    return h;
   },
 
   //////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -140,7 +163,6 @@ var funcStruct = {
       )
     );
   },
-
 
   //////////////////////////////////////////////////////////////////////////////////////////////////////////
   // gives you all the broken

@@ -86,7 +86,7 @@ var funcCreeps = {
 
           // delete old helping if necessary;
           if (creep.memory.helping){
-            delete Memory.sources[creep.memory.postRoom][creep.memory.helping].extras[creep.name];
+            Memory.sources[creep.memory.postRoom][creep.memory.helping].extras[creep.name] = undefined;
             creep.memory.helping = null;
           }
 
@@ -99,7 +99,7 @@ var funcCreeps = {
         }
 
         // become a helper
-        if (!funcStruct.fullPotential(i, roomName) && !creep.memory.helping){
+        if (funcStruct.minePower(i, roomName) < 5 && !creep.memory.helping){
           creep.memory.helping = i;
           creep.memory.postRoom = roomName;
           creep.memory.post = null;
